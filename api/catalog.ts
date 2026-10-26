@@ -1,6 +1,6 @@
 import type { IncomingMessage, ServerResponse } from "node:http";
-import { listAlbums, storeError } from "../server/albums";
-import { isAuthenticated, send } from "../server/session";
+import { listAlbums, storeError } from "../server/albums.js";
+import { isAuthenticated, send } from "../server/session.js";
 
 // O catálogo só existe no servidor: o navegador o recebe apenas após autenticar.
 export default async function handler(req: IncomingMessage, res: ServerResponse) {

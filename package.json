@@ -2,6 +2,7 @@
   "name": "slopfy",
   "private": true,
   "version": "1.0.0",
+  "type": "module",
   "engines": {
     "node": "22.x"
   },
@@ -10,7 +11,7 @@
     "build": "tsc --noEmit && vite build",
     "preview": "vite preview",
     "typecheck": "tsc --noEmit",
-    "seed": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/seed.ts"
+    "seed": "node scripts/seed.ts"
   },
   "dependencies": {
     "@breezystack/lamejs": "^1.2.7",

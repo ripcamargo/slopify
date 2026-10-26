@@ -1,5 +1,5 @@
 import type { IncomingMessage, ServerResponse } from "node:http";
-import { checkPassword, readJson, send, startSession } from "../server/session";
+import { checkPassword, readJson, send, startSession } from "../server/session.js";
 
 export default async function handler(req: IncomingMessage, res: ServerResponse) {
   if (req.method !== "POST") {

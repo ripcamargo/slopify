@@ -1,6 +1,6 @@
 import type { IncomingMessage, ServerResponse } from "node:http";
-import { reorderAlbums, storeError } from "../server/albums";
-import { isAuthenticated, readJson, send } from "../server/session";
+import { reorderAlbums, storeError } from "../server/albums.js";
+import { isAuthenticated, readJson, send } from "../server/session.js";
 
 // Recebe { ids } na nova ordem dos álbuns.
 export default async function handler(req: IncomingMessage, res: ServerResponse) {

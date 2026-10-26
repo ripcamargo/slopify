@@ -1,7 +1,7 @@
 import type { ServerResponse } from "node:http";
 import type { Album, Track } from "../src/types";
-import { firestore, NotConfiguredError } from "./firebase";
-import { send } from "./session";
+import { firestore, NotConfiguredError } from "./firebase.js";
+import { send } from "./session.js";
 
 // Cada álbum é um documento em "albums" (id = album.id) com um campo "order" para a posição.
 const albums = () => firestore().collection("albums");

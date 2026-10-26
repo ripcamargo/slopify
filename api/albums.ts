@@ -1,6 +1,6 @@
 import type { IncomingMessage, ServerResponse } from "node:http";
-import { deleteAlbum, parseAlbum, saveAlbum, storeError } from "../server/albums";
-import { isAuthenticated, readJson, send } from "../server/session";
+import { deleteAlbum, parseAlbum, saveAlbum, storeError } from "../server/albums.js";
+import { isAuthenticated, readJson, send } from "../server/session.js";
 
 // PUT cria ou substitui um álbum inteiro (com as faixas); DELETE ?id= remove.
 export default async function handler(req: IncomingMessage, res: ServerResponse) {

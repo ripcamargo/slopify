@@ -1,5 +1,5 @@
 import type { IncomingMessage, ServerResponse } from "node:http";
-import { endSession, send } from "../server/session";
+import { endSession, send } from "../server/session.js";
 
 export default function handler(req: IncomingMessage, res: ServerResponse) {
   if (req.method !== "POST") {
