@@ -66,7 +66,7 @@ export function send(res: ServerResponse, status: number, body?: unknown) {
 }
 
 /** Lê o corpo JSON (a Vercel já entrega req.body; em dev lemos o stream). */
-export async function readJson(req: IncomingMessage): Promise<Record<string, unknown>> {
+export async function readJson(req: IncomingMessage, maxBytes = 2048): Promise<Record<string, unknown>> {
   const preParsed = (req as { body?: unknown }).body;
   if (preParsed !== undefined) {
     if (typeof preParsed === "string") return safeParse(preParsed);
@@ -75,7 +75,7 @@ export async function readJson(req: IncomingMessage): Promise<Record<string, unk
   let data = "";
   for await (const chunk of req) {
     data += chunk;
-    if (data.length > 2048) return {};
+    if (data.length > maxBytes) return {};
   }
   return safeParse(data);
 }

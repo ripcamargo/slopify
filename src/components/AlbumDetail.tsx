@@ -1,32 +1,8 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import type { Album } from "../types";
 import { usePlayer } from "../player";
 import { PauseIcon, PlayIcon } from "../icons";
 import { trackFallback } from "../lib";
-
-function Lyrics({ url }: { url: string }) {
-  const [text, setText] = useState<string | null | undefined>(undefined); // undefined = carregando, null = falhou
-
-  useEffect(() => {
-    let cancelled = false;
-    fetch(url)
-      .then(async (res) => {
-        // Em dev, arquivo inexistente devolve o index.html; trate como erro.
-        const isHtml = res.headers.get("content-type")?.includes("text/html");
-        if (!res.ok || isHtml) throw new Error();
-        return res.text();
-      })
-      .then((t) => !cancelled && setText(t.trim()))
-      .catch(() => !cancelled && setText(null));
-    return () => {
-      cancelled = true;
-    };
-  }, [url]);
-
-  if (text === undefined) return <p className="lyrics muted">Carregando…</p>;
-  if (text === null) return <p className="lyrics muted">Não encontrei o arquivo da letra.</p>;
-  return <pre className="lyrics">{text}</pre>;
-}
 
 export default function AlbumDetail({ album }: { album: Album }) {
   const player = usePlayer();
@@ -36,8 +12,8 @@ export default function AlbumDetail({ album }: { album: Album }) {
     <>
       <a className="back" href="#/">← Biblioteca</a>
       <header className="album-head">
-        <img src={album.cover} alt="" />
-        <div>
+        <img src={album.cover || undefined} alt="" />
+        <div className="album-info">
           <h1>{album.title}</h1>
           <p className="muted">
             {[
@@ -49,6 +25,7 @@ export default function AlbumDetail({ album }: { album: Album }) {
               .filter(Boolean)
               .join(" · ")}
           </p>
+          <a className="btn" href={`#/album/${encodeURIComponent(album.id)}/editar`}>Editar</a>
         </div>
       </header>
 
@@ -57,7 +34,7 @@ export default function AlbumDetail({ album }: { album: Album }) {
           const active = player.album?.id === album.id && player.index === i;
           const isPlaying = active && player.playing && !player.error;
           const fallback = trackFallback(track);
-          const showLyrics = lyricsOpen === track.id && track.lyricsUrl;
+          const showLyrics = lyricsOpen === track.id && !!track.lyrics;
           return (
             <li key={track.id} className={active ? "track active" : "track"}>
               <div className="track-row">
@@ -75,17 +52,17 @@ export default function AlbumDetail({ album }: { album: Album }) {
                     {fallback.label}
                   </a>
                 )}
-                {track.lyricsUrl && (
+                {track.lyrics && (
                   <button
                     className="lyrics-btn"
-                    aria-expanded={!!showLyrics}
+                    aria-expanded={showLyrics}
                     onClick={() => setLyricsOpen(showLyrics ? null : track.id)}
                   >
                     Letra
                   </button>
                 )}
               </div>
-              {showLyrics && <Lyrics url={track.lyricsUrl!} />}
+              {showLyrics && <pre className="lyrics">{track.lyrics}</pre>}
             </li>
           );
         })}

@@ -21,7 +21,7 @@ export default function PlayerBar() {
   return (
     <footer className="player">
       <div className="player-info">
-        <img src={p.album.cover} alt="" />
+        <img src={p.album.cover || undefined} alt="" />
         <div className="player-text">
           <strong>{track.title}</strong>
           <span>{p.album.title}</span>

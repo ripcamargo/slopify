@@ -1,0 +1,5 @@
+{
+  "functions": {
+    "api/media.ts": { "includeFiles": "server/media.json" }
+  }
+}

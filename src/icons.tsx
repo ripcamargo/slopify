@@ -25,3 +25,12 @@ export const Logo = () => (
     </g>
   </svg>
 );
+export const UpIcon = () => (
+  <svg {...base}><path d="M11.3 7.3a1 1 0 0 1 1.4 0l6 6a1 1 0 0 1-1.4 1.4L12 9.4l-5.3 5.3a1 1 0 0 1-1.4-1.4z" /></svg>
+);
+export const DownIcon = () => (
+  <svg {...base}><path d="M5.3 9.3a1 1 0 0 1 1.4 0l5.3 5.3 5.3-5.3a1 1 0 0 1 1.4 1.4l-6 6a1 1 0 0 1-1.4 0l-6-6a1 1 0 0 1 0-1.4z" /></svg>
+);
+export const CloseIcon = () => (
+  <svg {...base}><path d="M6.3 6.3a1 1 0 0 1 1.4 0L12 10.6l4.3-4.3a1 1 0 1 1 1.4 1.4L13.4 12l4.3 4.3a1 1 0 0 1-1.4 1.4L12 13.4l-4.3 4.3a1 1 0 0 1-1.4-1.4l4.3-4.3-4.3-4.3a1 1 0 0 1 0-1.4z" /></svg>
+);

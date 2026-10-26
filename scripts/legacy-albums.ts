@@ -1,14 +1,6 @@
-import type { Album } from "../types";
-
-// Único arquivo para editar o catálogo.
-// - Novo álbum: adicione um objeto abaixo e coloque a capa em public/covers/.
-// - Nova versão de uma demo: troque só o driveUrl da faixa, mantendo a posição.
-// Cada faixa usa UMA das duas fontes de áudio (audioUrl tem prioridade se ambas existirem):
-// - audioUrl: arquivo em public/audio/, ex.: "/audio/demo-01.mp3" (confiável, mas público por URL).
-// - driveUrl: https://drive.google.com/file/d/ID/view, .../open?id=ID, .../uc?id=ID
-// Opcionais: artist no álbum (agrupa a biblioteca por banda) e
-// lyricsUrl na faixa, ex.: "/lyrics/nao-me-apegar.txt" (arquivo .txt UTF-8 em public/lyrics/).
-export const albums: Album[] = [
+// Catálogo antigo (antes do Firebase). Só é usado por `npm run seed` para a importação inicial;
+// depois de importar, pode apagar este arquivo.
+export const albums = [
   {
     id: "album-01",
     artist: "Chovendin",
@@ -32,7 +24,7 @@ export const albums: Album[] = [
       {
         id: "track-03",
         title: "Difícil demais",
-        lyricsUrl: "/lyrics/dificil-demais.txt",
+        lyricsUrl: "/lyrics/foi-dificil-demais.txt",
         audioUrl: "/audio/Mares Inavegáveis/foi difícil de mais.mp3",
       },
       {

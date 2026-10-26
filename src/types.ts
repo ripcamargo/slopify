@@ -5,8 +5,8 @@ export interface Track {
   audioUrl?: string;
   /** Link público de compartilhamento do Google Drive. */
   driveUrl?: string;
-  /** Arquivo .txt (UTF-8) em public/lyrics/, ex.: "/lyrics/demo-01.txt". */
-  lyricsUrl?: string;
+  /** Letra em texto puro. */
+  lyrics?: string;
 }
 
 export interface Album {
@@ -14,10 +14,16 @@ export interface Album {
   title: string;
   /** Banda ou artista; a biblioteca agrupa os álbuns por este nome. */
   artist?: string;
-  /** Caminho da capa quadrada dentro de public/, ex.: "/covers/album-01.jpg". */
+  /** Caminho da capa dentro de public/ (ex.: "/covers/album-01.jpg") ou imagem enviada pelo app (data URL). */
   cover: string;
   year?: number;
   description?: string;
   /** A ordem do array é a ordem de exibição. */
   tracks: Track[];
+}
+
+/** Arquivos disponíveis em public/ para escolher no editor. */
+export interface Media {
+  audio: string[];
+  covers: string[];
 }
