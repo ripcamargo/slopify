@@ -47,26 +47,29 @@ h1 { font-size: 1.75rem; margin: 0 0 1.25rem; letter-spacing: -0.02em; }
 .content { padding: 32px; min-width: 0; }
 
 /* Grade */
-.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); grid-auto-flow: row dense; gap: 20px; }
+.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); grid-auto-flow: row dense; align-items: start; gap: 20px; }
 .card { background: var(--surface); padding: 14px; border-radius: 10px; display: flex; flex-direction: column; gap: 4px; transition: background 0.15s; }
 .card:hover { background: var(--surface-2); }
-.card img { width: 100%; aspect-ratio: 1; object-fit: cover; border-radius: 6px; margin-bottom: 10px; background: var(--surface-2); }
-.card strong { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.card span { color: var(--muted); font-size: 0.875rem; }
-.card-link { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
-.card-open { background: var(--surface-2); }
+.card-head { display: flex; flex-direction: column; min-width: 0; }
+.card-cover img { width: 100%; aspect-ratio: 1; object-fit: cover; border-radius: 6px; margin-bottom: 10px; background: var(--surface-2); }
+.card-info { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+.card-info strong { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.card-info span { color: var(--muted); font-size: 0.875rem; }
+/* Aberto: ocupa duas colunas, capa à esquerda, nome à direita e as faixas embaixo. */
+.card-open { grid-column: span 2; background: var(--surface-2); }
+.card-open .card-head { flex-direction: row; align-items: flex-end; gap: 16px; margin-bottom: 12px; }
+.card-open .card-cover { width: 112px; flex: none; }
+.card-open .card-cover img { margin-bottom: 0; box-shadow: 0 6px 20px rgba(0, 0, 0, 0.45); }
+.card-open .card-info strong { white-space: normal; font-size: 1.25rem; line-height: 1.15; letter-spacing: -0.01em; }
 .card-toggle { align-self: flex-start; display: inline-flex; align-items: center; gap: 2px; margin-top: 6px; color: var(--muted); font-size: 0.8rem; font-weight: 600; }
 .card-toggle:hover { color: var(--text); }
 .card-toggle svg { width: 16px; height: 16px; transition: transform 0.15s; }
 .card-toggle[aria-expanded="true"] svg { transform: rotate(180deg); }
 .drop-target { outline: 2px solid var(--green); outline-offset: -2px; }
 
-/* Faixas abertas na biblioteca */
-.album-panel { grid-column: 1 / -1; background: var(--surface-2); border-radius: 10px; padding: 6px 8px 10px; }
-.album-panel header { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 2px 0 6px 12px; font-weight: 700; }
-.album-panel header a:hover { text-decoration: underline; }
+/* Faixas no card aberto */
 .panel-empty { padding: 8px 12px; }
-.panel-tracks { list-style: none; margin: 0; padding: 0; }
+.panel-tracks { list-style: none; margin: 0 -6px; padding: 0; }
 .panel-track { display: flex; align-items: center; border-radius: 6px; cursor: grab; }
 .panel-track:hover { background: #2e2e2e; }
 .panel-play { flex: 1; min-width: 0; display: flex; align-items: center; gap: 16px; padding: 8px 12px 8px 0; text-align: left; }

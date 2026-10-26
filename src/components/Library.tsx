@@ -3,7 +3,7 @@ import type { Album } from "../types";
 import { newId, saveOrder, saveTracks } from "../api";
 import { dropIndex, moveItem, startDrag } from "../dnd";
 import { usePlayer } from "../player";
-import { CloseIcon, DownIcon, GripIcon, PauseIcon, PlayIcon, UpIcon } from "../icons";
+import { DownIcon, GripIcon, PauseIcon, PlayIcon, UpIcon } from "../icons";
 
 const EXPANDED_KEY = "slopify:expanded";
 
@@ -34,104 +34,90 @@ interface CardProps extends DndProps {
   onToggle: () => void;
 }
 
-function AlbumCard({ album, expanded, onToggle, drag, target, onOver, onDrop }: CardProps) {
+function AlbumCard({ album, expanded, onToggle, drag, target, onDragStart, onOver, onDrop, onDragEnd }: CardProps) {
+  const player = usePlayer();
   const count = album.tracks.length;
-  // Soltar uma faixa sobre a capa coloca-a no fim deste álbum.
-  const over = (e: DragEvent) => {
-    if (!drag) return;
-    e.preventDefault();
-    onOver({ albumId: album.id, index: count });
-  };
-  const isTarget = !!drag && target?.albumId === album.id && drag.albumId !== album.id;
+  const href = `#/album/${encodeURIComponent(album.id)}`;
+  const here = drag && target?.albumId === album.id ? target.index : -1;
+  // Soltar fora da lista (ou na capa de um álbum fechado) coloca a faixa no fim.
+  const isTarget = !!drag && here >= 0 && (!expanded || drag.albumId !== album.id) && here === count;
 
   return (
     <div
       className={["card", expanded && "card-open", isTarget && "drop-target"].filter(Boolean).join(" ")}
-      onDragOver={over}
-      onDrop={(e) => {
-        e.preventDefault();
-        onDrop();
-      }}
-    >
-      <a className="card-link" href={`#/album/${encodeURIComponent(album.id)}`}>
-        <img src={album.cover || undefined} alt="" loading="lazy" />
-        <strong>{album.title}</strong>
-        {album.year && <span>{album.year}</span>}
-      </a>
-      <button className="card-toggle" onClick={onToggle} aria-expanded={expanded}>
-        {count} {count === 1 ? "faixa" : "faixas"}
-        <DownIcon />
-      </button>
-    </div>
-  );
-}
-
-function AlbumPanel({ album, onClose, drag, target, onDragStart, onOver, onDrop, onDragEnd }: DndProps & { album: Album; onClose: () => void }) {
-  const player = usePlayer();
-  const here = drag && target?.albumId === album.id ? target.index : -1;
-  const last = album.tracks.length - 1;
-
-  return (
-    <section
-      className="album-panel"
-      aria-label={`Faixas de ${album.title}`}
       onDragOver={(e) => {
         if (!drag) return;
         e.preventDefault();
-        onOver({ albumId: album.id, index: album.tracks.length });
+        onOver({ albumId: album.id, index: count });
       }}
       onDrop={(e) => {
         e.preventDefault();
         onDrop();
       }}
     >
-      <header>
-        <a href={`#/album/${encodeURIComponent(album.id)}`}>{album.title}</a>
-        <button className="icon-btn" onClick={onClose} aria-label="Recolher">
-          <CloseIcon />
-        </button>
-      </header>
-      {album.tracks.length === 0 && <p className="muted panel-empty">Sem faixas. Arraste uma para cá.</p>}
-      <ol className="panel-tracks">
-        {album.tracks.map((track, i) => {
-          const active = player.album?.id === album.id && player.index === i;
-          const isPlaying = active && player.playing && !player.error;
-          const dragging = drag?.trackId === track.id && drag.albumId === album.id;
-          const cls = [
-            "panel-track",
-            active && "active",
-            dragging && "dragging",
-            here === i && "drop-before",
-            here === i + 1 && i === last && "drop-after",
-          ];
-          return (
-            <li
-              key={track.id}
-              className={cls.filter(Boolean).join(" ")}
-              draggable
-              onDragStart={(e) => {
-                startDrag(e);
-                onDragStart({ albumId: album.id, trackId: track.id });
-              }}
-              onDragEnd={onDragEnd}
-              onDragOver={(e) => {
-                if (!drag) return;
-                e.preventDefault();
-                e.stopPropagation();
-                onOver({ albumId: album.id, index: dropIndex(e, i) });
-              }}
-            >
-              <span className="grip" aria-hidden="true"><GripIcon /></span>
-              <button className="panel-play" onClick={() => player.play(album, i)} aria-label={`${isPlaying ? "Pausar" : "Reproduzir"} ${track.title}`}>
-                <span className="track-num">{i + 1}</span>
-                <span className="track-icon">{isPlaying ? <PauseIcon /> : <PlayIcon />}</span>
-                <span className="track-title">{track.title}</span>
-              </button>
-            </li>
-          );
-        })}
-      </ol>
-    </section>
+      <div className="card-head">
+        <a className="card-cover" href={href} tabIndex={-1} aria-hidden="true">
+          <img src={album.cover || undefined} alt="" loading="lazy" />
+        </a>
+        <div className="card-info">
+          <a href={href}>
+            <strong>{album.title}</strong>
+          </a>
+          {expanded ? (
+            <span>{[album.artist, album.year].filter(Boolean).join(" · ")}</span>
+          ) : (
+            album.year && <span>{album.year}</span>
+          )}
+          <button className="card-toggle" onClick={onToggle} aria-expanded={expanded}>
+            {count} {count === 1 ? "faixa" : "faixas"}
+            <DownIcon />
+          </button>
+        </div>
+      </div>
+
+      {expanded && (
+        <ol className="panel-tracks" aria-label={`Faixas de ${album.title}`}>
+          {count === 0 && <li className="muted panel-empty">Sem faixas. Arraste uma para cá.</li>}
+          {album.tracks.map((track, i) => {
+            const active = player.album?.id === album.id && player.index === i;
+            const isPlaying = active && player.playing && !player.error;
+            const dragging = drag?.trackId === track.id && drag.albumId === album.id;
+            const cls = [
+              "panel-track",
+              active && "active",
+              dragging && "dragging",
+              here === i && "drop-before",
+              here === i + 1 && i === count - 1 && "drop-after",
+            ];
+            return (
+              <li
+                key={track.id}
+                className={cls.filter(Boolean).join(" ")}
+                draggable
+                onDragStart={(e) => {
+                  startDrag(e);
+                  onDragStart({ albumId: album.id, trackId: track.id });
+                }}
+                onDragEnd={onDragEnd}
+                onDragOver={(e) => {
+                  if (!drag) return;
+                  e.preventDefault();
+                  e.stopPropagation();
+                  onOver({ albumId: album.id, index: dropIndex(e, i) });
+                }}
+              >
+                <span className="grip" aria-hidden="true"><GripIcon /></span>
+                <button className="panel-play" onClick={() => player.play(album, i)} aria-label={`${isPlaying ? "Pausar" : "Reproduzir"} ${track.title}`}>
+                  <span className="track-num">{i + 1}</span>
+                  <span className="track-icon">{isPlaying ? <PauseIcon /> : <PlayIcon />}</span>
+                  <span className="track-title">{track.title}</span>
+                </button>
+              </li>
+            );
+          })}
+        </ol>
+      )}
+    </div>
   );
 }
 
@@ -282,11 +268,9 @@ export default function Library({ albums, onChange }: Props) {
           <section key={artist} className="group">
             {hasArtists && <h2>{artist || "Outros"}</h2>}
             <div className="grid">
-              {list.flatMap((a) => {
-                const open = expanded.has(a.id);
-                const card = <AlbumCard key={a.id} album={a} expanded={open} onToggle={() => toggle(a.id)} {...dnd} />;
-                return open ? [card, <AlbumPanel key={`${a.id}-panel`} album={a} onClose={() => toggle(a.id)} {...dnd} />] : [card];
-              })}
+              {list.map((a) => (
+                <AlbumCard key={a.id} album={a} expanded={expanded.has(a.id)} onToggle={() => toggle(a.id)} {...dnd} />
+              ))}
             </div>
           </section>
         ))
