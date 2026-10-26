@@ -1,7 +1,8 @@
-import { useEffect, useState, type ChangeEvent, type FormEvent } from "react";
+import { useEffect, useState, type ChangeEvent, type DragEvent, type FormEvent } from "react";
 import type { Album, Media, Track } from "../types";
 import { deleteAlbum, fetchMedia, newId, saveAlbum, titleFromFile } from "../api";
-import { CloseIcon, DownIcon, UpIcon } from "../icons";
+import { dropIndex, moveItem, startDrag } from "../dnd";
+import { CloseIcon, DownIcon, GripIcon, UpIcon } from "../icons";
 
 interface Props {
   /** Ausente ao criar um álbum novo. */
@@ -34,10 +35,14 @@ interface TrackRowProps {
   onChange: (changes: Partial<Track>) => void;
   onMove: (delta: number) => void;
   onRemove: () => void;
+  /** Arrastar e soltar: classes de estado e eventos da linha. */
+  dnd: { className: string; onDragStart: () => void; onDragOver: (e: DragEvent<HTMLElement>) => void; onDragEnd: () => void };
 }
 
-function TrackRow({ track, index, count, media, onChange, onMove, onRemove }: TrackRowProps) {
+function TrackRow({ track, index, count, media, onChange, onMove, onRemove, dnd }: TrackRowProps) {
   const [open, setOpen] = useState(false);
+  // Só arrasta pelo pegador, para não atrapalhar a seleção de texto nos campos.
+  const [armed, setArmed] = useState(false);
   const missing = !!track.audioUrl && !!media?.audio.length && !media.audio.includes(track.audioUrl);
 
   function setAudio(audioUrl: string) {
@@ -46,9 +51,23 @@ function TrackRow({ track, index, count, media, onChange, onMove, onRemove }: Tr
   }
 
   return (
-    <li className="edit-track">
+    <li
+      className={`edit-track ${dnd.className}`}
+      draggable={armed}
+      onDragStart={(e) => {
+        startDrag(e);
+        dnd.onDragStart();
+      }}
+      onDragOver={dnd.onDragOver}
+      onDragEnd={() => {
+        setArmed(false);
+        dnd.onDragEnd();
+      }}
+    >
       <div className="edit-track-row">
-        <span className="track-num">{index + 1}</span>
+        <span className="grip" title="Arraste para reordenar" onPointerDown={() => setArmed(true)} onPointerUp={() => setArmed(false)}>
+          <GripIcon />
+        </span>
         <input
           className="input"
           placeholder="Título"
@@ -101,6 +120,7 @@ export default function AlbumEditor({ album, albums, onSaved, onDeleted }: Props
   const [media, setMedia] = useState<Media | null>(null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
+  const [drag, setDrag] = useState<{ from: number; to: number } | null>(null);
 
   useEffect(() => {
     fetchMedia().then(setMedia, () => setMedia({ audio: [], covers: [] }));
@@ -115,12 +135,12 @@ export default function AlbumEditor({ album, albums, onSaved, onDeleted }: Props
   const setTracks = (update: (tracks: Track[]) => Track[]) => setDraft((d) => ({ ...d, tracks: update(d.tracks) }));
 
   function moveTrack(index: number, delta: number) {
-    setTracks((tracks) => {
-      const list = [...tracks];
-      const [item] = list.splice(index, 1);
-      list.splice(index + delta, 0, item);
-      return list;
-    });
+    setTracks((tracks) => moveItem(tracks, index, delta > 0 ? index + delta + 1 : index + delta));
+  }
+
+  function dropTrack() {
+    if (drag) setTracks((tracks) => moveItem(tracks, drag.from, drag.to));
+    setDrag(null);
   }
 
   function addFolder(folder: string) {
@@ -216,7 +236,13 @@ export default function AlbumEditor({ album, albums, onSaved, onDeleted }: Props
       </div>
 
       <h2 className="editor-section">Faixas</h2>
-      <ol className="edit-tracks">
+      <ol
+        className="edit-tracks"
+        onDrop={(e) => {
+          e.preventDefault();
+          dropTrack();
+        }}
+      >
         {draft.tracks.map((track, i) => (
           <TrackRow
             key={track.id}
@@ -227,6 +253,23 @@ export default function AlbumEditor({ album, albums, onSaved, onDeleted }: Props
             onChange={(changes) => setTracks((list) => list.map((t) => (t.id === track.id ? { ...t, ...changes } : t)))}
             onMove={(delta) => moveTrack(i, delta)}
             onRemove={() => setTracks((list) => list.filter((t) => t.id !== track.id))}
+            dnd={{
+              className: [
+                drag?.from === i && "dragging",
+                drag && drag.to === i && "drop-before",
+                drag && drag.to === i + 1 && i === draft.tracks.length - 1 && "drop-after",
+              ]
+                .filter(Boolean)
+                .join(" "),
+              onDragStart: () => setDrag({ from: i, to: i }),
+              onDragOver: (e) => {
+                if (!drag) return;
+                e.preventDefault();
+                const to = dropIndex(e, i);
+                if (to !== drag.to) setDrag({ ...drag, to });
+              },
+              onDragEnd: () => setDrag(null),
+            }}
           />
         ))}
       </ol>

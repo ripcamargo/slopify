@@ -5,7 +5,7 @@ import { writeManifest } from "./server/media";
 // Em desenvolvimento, serve as funções de /api com o mesmo código usado na Vercel.
 function devApi(): Plugin {
   return {
-    name: "slopfy-dev-api",
+    name: "slopify-dev-api",
     configureServer(server) {
       const env = loadEnv(server.config.mode, process.cwd(), "");
       for (const key of ["SLOPFY_PASSWORD", "FIREBASE_SERVICE_ACCOUNT"]) {
@@ -13,7 +13,7 @@ function devApi(): Plugin {
       }
 
       server.middlewares.use(async (req, res, next) => {
-        const route = req.url?.match(/^\/api\/(login|logout|catalog|albums|order|media)(?:\?|$)/)?.[1];
+        const route = req.url?.match(/^\/api\/(login|logout|catalog|albums|order|media|tracks)(?:\?|$)/)?.[1];
         if (!route) return next();
         try {
           const mod = await server.ssrLoadModule(`/api/${route}.ts`);
@@ -31,7 +31,7 @@ function devApi(): Plugin {
 // Atualiza server/media.json (lista de arquivos em public/) antes de cada build.
 function mediaManifest(): Plugin {
   return {
-    name: "slopfy-media-manifest",
+    name: "slopify-media-manifest",
     buildStart() {
       writeManifest();
     },

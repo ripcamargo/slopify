@@ -1,4 +1,4 @@
-# Slopfy
+# Slopify
 
 Catálogo musical pessoal e privado para as minhas demos. React + TypeScript + Vite, CSS puro, funções serverless
 da Vercel para a senha e para o catálogo, que fica no Firestore.

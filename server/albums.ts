@@ -33,6 +33,13 @@ export async function deleteAlbum(id: string) {
   await albums().doc(id).delete();
 }
 
+/** Troca só as faixas de um ou mais álbuns, numa única gravação (mover faixa entre álbuns). */
+export async function updateTracks(changes: { id: string; tracks: Track[] }[]) {
+  const batch = firestore().batch();
+  for (const { id, tracks } of changes) batch.update(albums().doc(id), { tracks });
+  await batch.commit();
+}
+
 export async function reorderAlbums(ids: string[]) {
   const existing = new Set((await albums().select().get()).docs.map((d) => d.id));
   const batch = firestore().batch();
@@ -68,6 +75,11 @@ function parseTrack(input: unknown, index: number): Track | null {
   });
 }
 
+export function parseTracks(input: unknown): Track[] | null {
+  const tracks = Array.isArray(input) ? input.slice(0, 300).map(parseTrack) : [];
+  return tracks.includes(null) ? null : (tracks as Track[]);
+}
+
 export function parseAlbum(input: unknown): Album | null {
   if (!input || typeof input !== "object") return null;
   const a = input as Record<string, unknown>;
@@ -76,8 +88,8 @@ export function parseAlbum(input: unknown): Album | null {
   const cover = text(a.cover, MAX_COVER + 1);
   if (!ID.test(id) || !title || cover.length > MAX_COVER) return null;
   const year = Number(a.year);
-  const tracks = Array.isArray(a.tracks) ? a.tracks.slice(0, 300).map(parseTrack) : [];
-  if (tracks.includes(null)) return null;
+  const tracks = parseTracks(a.tracks);
+  if (!tracks) return null;
   return {
     ...compact({
       id,
@@ -87,7 +99,7 @@ export function parseAlbum(input: unknown): Album | null {
       year: Number.isInteger(year) && year > 1900 && year < 2200 ? year : undefined,
     }),
     cover,
-    tracks: tracks as Track[],
+    tracks,
   };
 }
 

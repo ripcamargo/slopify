@@ -28,3 +28,7 @@ export function titleFromFile(path: string): string {
     .trim();
   return name.charAt(0).toUpperCase() + name.slice(1);
 }
+
+/** Grava as faixas de um ou mais álbuns de uma vez. */
+export const saveTracks = (albums: Pick<Album, "id" | "tracks">[]) =>
+  call("/api/tracks", "PUT", { albums: albums.map(({ id, tracks }) => ({ id, tracks })) });

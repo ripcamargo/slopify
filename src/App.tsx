@@ -57,7 +57,7 @@ function Shell({ albums, setAlbums, onLogout }: ShellProps) {
   else if (creating) page = <AlbumEditor albums={albums} onSaved={saved} />;
   else if (album && editing) page = <AlbumEditor key={album.id} album={album} albums={albums} onSaved={saved} onDeleted={removed} />;
   else if (album) page = <AlbumDetail album={album} />;
-  else page = <Library albums={albums} onReorder={(list) => setAlbums(() => list)} />;
+  else page = <Library albums={albums} onChange={(list) => setAlbums(() => list)} />;
 
   return (
     <PlayerProvider>
@@ -65,7 +65,7 @@ function Shell({ albums, setAlbums, onLogout }: ShellProps) {
         <aside className="sidebar">
           <a className="brand" href="#/">
             <Logo />
-            <span>Slopfy</span>
+            <span>Slopify</span>
           </a>
           <nav>
             <a className={album || optimizer || creating ? "" : "active"} href="#/" aria-label="Biblioteca">

@@ -30,7 +30,7 @@ export default function Login({ onSuccess }: { onSuccess: () => void }) {
       <form className="login-card" onSubmit={submit}>
         <div className="brand brand-lg">
           <Logo />
-          <span>Slopfy</span>
+          <span>Slopify</span>
         </div>
         <input
           type="password"
